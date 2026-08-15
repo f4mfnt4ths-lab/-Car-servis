@@ -22,7 +22,7 @@
 
     /* Карточка авто з фото */
     .car-card { background: #18181b; border-radius: 16px; overflow: hidden; border: 1px solid #27272a; margin-bottom: 15px; text-align: center; }
-    .car-img { width: 100%; height: 200px; object-fit: cover; background: #27272a; }
+    .car-img { width: 100%; height: 210px; object-fit: cover; background: #18181b; display: block; }
     .car-title { padding: 12px; font-size: 18px; font-weight: bold; color: #60a5fa; }
 
     /* Статус нагадувань */
@@ -50,7 +50,7 @@
 
   <!-- Карточка авто -->
   <div class="car-card" id="carCard">
-    <img id="carImgDisplay" class="car-img" src="https://images.unsplash.com/photo-1541348263662-e08266f9297a?auto=format&fit=crop&w=800&q=80" alt="Audi Q7">
+    <img id="carImgDisplay" class="car-img" src="https://picsum.photos/id/1071/800/400" alt="Авто">
     <div id="carTitleDisplay" class="car-title">🚗 Audi Q7</div>
   </div>
 
@@ -62,7 +62,7 @@
       <option value="vw_golf">Volkswagen Golf</option>
       <option value="vw_passat">Volkswagen Passat</option>
       <option value="bmw_3">BMW 3 Series</option>
-      <option value="custom">Інше авто (власна назва)</option>
+      <option value="custom">Інше авто</option>
     </select>
 
     <div class="row">
@@ -134,7 +134,7 @@
     const carPresets = {
       audi_q7: {
         model: 'Audi Q7',
-        img: 'https://images.unsplash.com/photo-1541348263662-e08266f9297a?auto=format&fit=crop&w=800&q=80'
+        img: 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=800&q=80'
       },
       vw_golf: {
         model: 'Volkswagen Golf',
@@ -142,7 +142,7 @@
       },
       vw_passat: {
         model: 'Volkswagen Passat',
-        img: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80'
+        img: 'https://images.unsplash.com/photo-1541348263662-e08266f9297a?auto=format&fit=crop&w=800&q=80'
       },
       bmw_3: {
         model: 'BMW 3 Series',
@@ -162,15 +162,14 @@
       const imgElem = document.getElementById('carImgDisplay');
       const titleElem = document.getElementById('carTitleDisplay');
 
-      if (car.model) {
-        document.getElementById('carModel').value = car.model || '';
-        document.getElementById('carYear').value = car.year || '';
-        titleElem.innerText = `🚗 ${car.model} ${car.year ? '(' + car.year + ')' : ''}`;
+      const model = car.model || 'Audi Q7';
+      const year = car.year || '2018';
+      const imgUrl = car.imgUrl || carPresets.audi_q7.img;
 
-        if (car.imgUrl) {
-          imgElem.src = car.imgUrl;
-        }
-      }
+      document.getElementById('carModel').value = model;
+      document.getElementById('carYear').value = year;
+      titleElem.innerText = `🚗 ${model} ${year ? '(' + year + ')' : ''}`;
+      imgElem.src = imgUrl;
     }
 
     function saveCar() {
@@ -178,11 +177,11 @@
       const year = document.getElementById('carYear').value;
       const presetKey = document.getElementById('carPreset').value;
 
-      let imgUrl = carPresets[presetKey] ? carPresets[presetKey].img : 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80';
+      let imgUrl = carPresets[presetKey] ? carPresets[presetKey].img : 'https://images.unsplash.com/photo-1603584173870-7f23fdae1b7a?auto=format&fit=crop&w=800&q=80';
 
       localStorage.setItem('car_info', JSON.stringify({ model, year, imgUrl }));
       loadCar();
-      alert('Авто збережено!');
+      alert('Дані та фото авто збережено!');
     }
 
     function checkReminders(history) {
