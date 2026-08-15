@@ -22,7 +22,7 @@
 
     /* Карточка авто з фото */
     .car-card { background: #18181b; border-radius: 16px; overflow: hidden; border: 1px solid #27272a; margin-bottom: 15px; text-align: center; }
-    .car-img { width: 100%; height: 180px; object-fit: cover; display: none; background: #27272a; }
+    .car-img { width: 100%; height: 200px; object-fit: cover; background: #27272a; }
     .car-title { padding: 12px; font-size: 18px; font-weight: bold; color: #60a5fa; }
 
     /* Статус нагадувань */
@@ -50,29 +50,36 @@
 
   <!-- Карточка авто -->
   <div class="car-card" id="carCard">
-    <img id="carImgDisplay" class="car-img" src="" alt="Auto">
-    <div id="carTitleDisplay" class="car-title" style="display:none;"></div>
+    <img id="carImgDisplay" class="car-img" src="https://images.unsplash.com/photo-1541348263662-e08266f9297a?auto=format&fit=crop&w=800&q=80" alt="Audi Q7">
+    <div id="carTitleDisplay" class="car-title">🚗 Audi Q7</div>
   </div>
 
-  <!-- Налаштування авто -->
+  <!-- Вибір авто -->
   <div class="card">
-    <label>Дані про автомобіль:</label>
+    <label>Вибери автомобіль або вкажи свій:</label>
+    <select id="carPreset" onchange="applyPreset()">
+      <option value="audi_q7">Audi Q7</option>
+      <option value="vw_golf">Volkswagen Golf</option>
+      <option value="vw_passat">Volkswagen Passat</option>
+      <option value="bmw_3">BMW 3 Series</option>
+      <option value="custom">Інше авто (власна назва)</option>
+    </select>
+
     <div class="row">
       <div style="flex: 2;">
-        <input type="text" id="carModel" placeholder="Марка та модель (Audi Q7, Golf 7)">
+        <input type="text" id="carModel" placeholder="Марка та модель" value="Audi Q7">
       </div>
       <div style="flex: 1;">
-        <input type="number" id="carYear" placeholder="Рік">
+        <input type="number" id="carYear" placeholder="Рік" value="2018">
       </div>
     </div>
-    <label>Посилання на фото машини (з інтернету):</label>
-    <input type="text" id="carImgUrl" placeholder="https://example.com/photo.jpg">
-    <button style="background: #374151; padding: 10px; font-size: 13px;" class="btn-add" onclick="saveCar()">Зберегти авто та фото</button>
+    
+    <button style="background: #374151; padding: 10px; font-size: 13px;" class="btn-add" onclick="saveCar()">Зберегти вибране авто</button>
   </div>
 
-  <!-- Блок попереджень про заміну -->
+  <!-- Блок попереджень -->
   <div id="statusBox" class="status-box status-ok">
-    ✅ Усі регламентні роботи в нормі
+    💡 Запиши останній пробіг заміни масла, щоб активувати нагадування.
   </div>
 
   <!-- Форма запису робіт -->
@@ -101,7 +108,7 @@
     </div>
 
     <label>Фірма, деталь або нотатки:</label>
-    <input type="text" id="note" placeholder="напр. Brembo, 5W-30 Shell...">
+    <input type="text" id="note" placeholder="напр. Brembo, 5W-30 Motul...">
 
     <label>Ціна (грн):</label>
     <input type="number" id="price" placeholder="2500">
@@ -124,6 +131,32 @@
     document.getElementById('date').valueAsDate = new Date();
     let currentFilter = 'ALL';
 
+    const carPresets = {
+      audi_q7: {
+        model: 'Audi Q7',
+        img: 'https://images.unsplash.com/photo-1541348263662-e08266f9297a?auto=format&fit=crop&w=800&q=80'
+      },
+      vw_golf: {
+        model: 'Volkswagen Golf',
+        img: 'https://images.unsplash.com/photo-1539799139339-50c5fe1e2b1b?auto=format&fit=crop&w=800&q=80'
+      },
+      vw_passat: {
+        model: 'Volkswagen Passat',
+        img: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80'
+      },
+      bmw_3: {
+        model: 'BMW 3 Series',
+        img: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80'
+      }
+    };
+
+    function applyPreset() {
+      const presetKey = document.getElementById('carPreset').value;
+      if (presetKey !== 'custom' && carPresets[presetKey]) {
+        document.getElementById('carModel').value = carPresets[presetKey].model;
+      }
+    }
+
     function loadCar() {
       const car = JSON.parse(localStorage.getItem('car_info') || '{}');
       const imgElem = document.getElementById('carImgDisplay');
@@ -132,18 +165,10 @@
       if (car.model) {
         document.getElementById('carModel').value = car.model || '';
         document.getElementById('carYear').value = car.year || '';
-        document.getElementById('carImgUrl').value = car.imgUrl || '';
-
-        titleElem.style.display = 'block';
         titleElem.innerText = `🚗 ${car.model} ${car.year ? '(' + car.year + ')' : ''}`;
 
         if (car.imgUrl) {
           imgElem.src = car.imgUrl;
-          imgElem.style.display = 'block';
-        } else {
-          // Стандартна картинка якщо немає посилання
-          imgElem.src = `https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80`;
-          imgElem.style.display = 'block';
         }
       }
     }
@@ -151,11 +176,13 @@
     function saveCar() {
       const model = document.getElementById('carModel').value;
       const year = document.getElementById('carYear').value;
-      const imgUrl = document.getElementById('carImgUrl').value;
-      
+      const presetKey = document.getElementById('carPreset').value;
+
+      let imgUrl = carPresets[presetKey] ? carPresets[presetKey].img : 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80';
+
       localStorage.setItem('car_info', JSON.stringify({ model, year, imgUrl }));
       loadCar();
-      alert('Дані авто та фото збережено!');
+      alert('Авто збережено!');
     }
 
     function checkReminders(history) {
@@ -174,7 +201,7 @@
 
       if (diffKm >= 10000) {
         statusBox.className = "status-box status-warn";
-        statusBox.innerHTML = `⚠️ <b>ПОРА МІНЯТИ МАСЛО!</b><br>Пройшло вже ${diffKm} км з останньої заміни (${lastOilKm} км).`;
+        statusBox.innerHTML = `⚠️ <b>ПОРА МІНЯТИ МАСЛО!</b><br>Пройшло вже ${diffKm} км з останньої заміни.`;
       } else {
         statusBox.className = "status-box status-ok";
         statusBox.innerHTML = `✅ До наступної заміни масла залишилось: <b>${10000 - diffKm} км</b>`;
