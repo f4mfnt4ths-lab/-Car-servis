@@ -6,26 +6,35 @@
   <title>Бортовий Журнал</title>
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #000; color: #f4f4f5; padding: 16px; padding-bottom: 40px; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b0b0e; color: #f4f4f5; padding: 16px; padding-bottom: 40px; }
     h1 { font-size: 22px; text-align: center; margin-top: 10px; margin-bottom: 15px; color: #3b82f6; }
     
-    .card { background: #1c1c1e; border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid #2c2c2e; }
+    .card { background: #18181b; border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid #27272a; }
     label { display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px; font-weight: 500; }
     
     select, input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #3f3f46; background: #27272a; color: white; font-size: 16px; margin-bottom: 12px; outline: none; }
-    select option { background: #27272a; color: white; }
     
     .row { display: flex; gap: 10px; }
     .row > div { flex: 1; }
     
     button.btn-add { width: 100%; padding: 14px; border-radius: 10px; border: none; background: #2563eb; color: white; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 5px; }
     button.btn-add:active { background: #1d4ed8; }
+
+    /* Карточка авто з фото */
+    .car-card { background: #18181b; border-radius: 16px; overflow: hidden; border: 1px solid #27272a; margin-bottom: 15px; text-align: center; }
+    .car-img { width: 100%; height: 180px; object-fit: cover; display: none; background: #27272a; }
+    .car-title { padding: 12px; font-size: 18px; font-weight: bold; color: #60a5fa; }
+
+    /* Статус нагадувань */
+    .status-box { padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 14px; font-weight: 500; }
+    .status-ok { background: #064e3b; color: #34d399; border: 1px solid #059669; }
+    .status-warn { background: #7f1d1d; color: #f87171; border: 1px solid #dc2626; }
     
     .filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; }
     .filter-btn { background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa; padding: 8px 14px; border-radius: 20px; font-size: 13px; white-space: nowrap; cursor: pointer; }
     .filter-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
 
-    .history-item { background: #1c1c1e; border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid #2c2c2e; display: flex; justify-content: space-between; align-items: flex-start; }
+    .history-item { background: #18181b; border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid #27272a; display: flex; justify-content: space-between; align-items: flex-start; }
     .category-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; background: #3b82f620; color: #60a5fa; }
     .item-title { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 2px; }
     .item-sub { font-size: 13px; color: #a1a1aa; }
@@ -33,37 +42,45 @@
     .item-km { font-size: 15px; font-weight: 600; color: #34d399; }
     .item-price { font-size: 13px; color: #f43f5e; margin-top: 3px; }
     .btn-del { background: transparent; border: none; color: #71717a; font-size: 16px; cursor: pointer; padding: 0 0 0 10px; }
-    
-    .car-info { background: #27272a; border-radius: 10px; padding: 10px; text-align: center; font-weight: 600; color: #60a5fa; margin-bottom: 10px; }
   </style>
 </head>
 <body>
 
   <h1>🚘 Сервісна Книжка</h1>
 
-  <!-- Блок авто -->
+  <!-- Карточка авто -->
+  <div class="car-card" id="carCard">
+    <img id="carImgDisplay" class="car-img" src="" alt="Auto">
+    <div id="carTitleDisplay" class="car-title" style="display:none;"></div>
+  </div>
+
+  <!-- Налаштування авто -->
   <div class="card">
     <label>Дані про автомобіль:</label>
     <div class="row">
       <div style="flex: 2;">
-        <input type="text" id="carModel" placeholder="Марка та модель (напр. Passat B7)">
+        <input type="text" id="carModel" placeholder="Марка та модель (Audi Q7, Golf 7)">
       </div>
       <div style="flex: 1;">
         <input type="number" id="carYear" placeholder="Рік">
       </div>
     </div>
-    <button style="background: #374151; padding: 8px; font-size: 13px;" class="btn-add" onclick="saveCar()">Зберегти авто</button>
+    <label>Посилання на фото машини (з інтернету):</label>
+    <input type="text" id="carImgUrl" placeholder="https://example.com/photo.jpg">
+    <button style="background: #374151; padding: 10px; font-size: 13px;" class="btn-add" onclick="saveCar()">Зберегти авто та фото</button>
   </div>
 
-  <!-- Відображення імені авто -->
-  <div id="carHeader" class="car-info" style="display: none;"></div>
+  <!-- Блок попереджень про заміну -->
+  <div id="statusBox" class="status-box status-ok">
+    ✅ Усі регламентні роботи в нормі
+  </div>
 
-  <!-- Запис робіт -->
+  <!-- Форма запису робіт -->
   <div class="card">
     <label>Що міняв / робив:</label>
     <select id="category">
-      <option value="🛢️ Моторне масло">🛢️ Моторне масло</option>
-      <option value="🛞 Гальмівні колодки/диски">🛞 Гальмівні колодки/диски</option>
+      <option value="🛢️ Моторне масло">🛢️ Моторне масло (кожні 10 тис. км)</option>
+      <option value="🛞 Гальмівні колодки/диски">🛞 Гальмівні колодки/диски (кожні 30 тис. км)</option>
       <option value="💨 Фільтри (повітр./салон/паливн.)">💨 Фільтри (повітряний / салон / паливний)</option>
       <option value="🔧 Ходова / Підвіска">🔧 Ходова / Підвіска</option>
       <option value="⚡ Свічки запалювання">⚡ Свічки запалювання</option>
@@ -84,7 +101,7 @@
     </div>
 
     <label>Фірма, деталь або нотатки:</label>
-    <input type="text" id="note" placeholder="напр. Brembo, 5W-30 Shell, важелі...">
+    <input type="text" id="note" placeholder="напр. Brembo, 5W-30 Shell...">
 
     <label>Ціна (грн):</label>
     <input type="number" id="price" placeholder="2500">
@@ -109,21 +126,59 @@
 
     function loadCar() {
       const car = JSON.parse(localStorage.getItem('car_info') || '{}');
+      const imgElem = document.getElementById('carImgDisplay');
+      const titleElem = document.getElementById('carTitleDisplay');
+
       if (car.model) {
         document.getElementById('carModel').value = car.model || '';
         document.getElementById('carYear').value = car.year || '';
-        const header = document.getElementById('carHeader');
-        header.style.display = 'block';
-        header.innerText = `🚗 ${car.model} ${car.year ? '(' + car.year + ')' : ''}`;
+        document.getElementById('carImgUrl').value = car.imgUrl || '';
+
+        titleElem.style.display = 'block';
+        titleElem.innerText = `🚗 ${car.model} ${car.year ? '(' + car.year + ')' : ''}`;
+
+        if (car.imgUrl) {
+          imgElem.src = car.imgUrl;
+          imgElem.style.display = 'block';
+        } else {
+          // Стандартна картинка якщо немає посилання
+          imgElem.src = `https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800&q=80`;
+          imgElem.style.display = 'block';
+        }
       }
     }
 
     function saveCar() {
       const model = document.getElementById('carModel').value;
       const year = document.getElementById('carYear').value;
-      localStorage.setItem('car_info', JSON.stringify({ model, year }));
+      const imgUrl = document.getElementById('carImgUrl').value;
+      
+      localStorage.setItem('car_info', JSON.stringify({ model, year, imgUrl }));
       loadCar();
-      alert('Дані авто збережено!');
+      alert('Дані авто та фото збережено!');
+    }
+
+    function checkReminders(history) {
+      const statusBox = document.getElementById('statusBox');
+      const lastOil = history.find(i => i.category.includes('Моторне масло'));
+      
+      if (!lastOil) {
+        statusBox.className = "status-box status-ok";
+        statusBox.innerHTML = "💡 Запиши останню заміну масла, щоб бачити нагадування.";
+        return;
+      }
+
+      const lastOilKm = parseInt(lastOil.km) || 0;
+      const latestKm = Math.max(...history.map(i => parseInt(i.km) || 0));
+      const diffKm = latestKm - lastOilKm;
+
+      if (diffKm >= 10000) {
+        statusBox.className = "status-box status-warn";
+        statusBox.innerHTML = `⚠️ <b>ПОРА МІНЯТИ МАСЛО!</b><br>Пройшло вже ${diffKm} км з останньої заміни (${lastOilKm} км).`;
+      } else {
+        statusBox.className = "status-box status-ok";
+        statusBox.innerHTML = `✅ До наступної заміни масла залишилось: <b>${10000 - diffKm} км</b>`;
+      }
     }
 
     function filterCat(cat, btn) {
@@ -137,6 +192,8 @@
       const history = JSON.parse(localStorage.getItem('car_service_log') || '[]');
       const container = document.getElementById('history');
       
+      checkReminders(history);
+
       const filtered = currentFilter === 'ALL' 
         ? history 
         : history.filter(item => item.category === currentFilter);
