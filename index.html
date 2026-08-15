@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Бортовий Журнал</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #000; color: #f4f4f5; padding: 16px; padding-bottom: 40px; }
+    h1 { font-size: 22px; text-align: center; margin-top: 10px; margin-bottom: 15px; color: #3b82f6; }
+    
+    .card { background: #1c1c1e; border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid #2c2c2e; }
+    label { display: block; font-size: 13px; color: #a1a1aa; margin-bottom: 5px; font-weight: 500; }
+    
+    select, input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #3f3f46; background: #27272a; color: white; font-size: 16px; margin-bottom: 12px; outline: none; }
+    select option { background: #27272a; color: white; }
+    
+    .row { display: flex; gap: 10px; }
+    .row > div { flex: 1; }
+    
+    button.btn-add { width: 100%; padding: 14px; border-radius: 10px; border: none; background: #2563eb; color: white; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 5px; }
+    button.btn-add:active { background: #1d4ed8; }
+    
+    .filter-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 15px; }
+    .filter-btn { background: #27272a; border: 1px solid #3f3f46; color: #a1a1aa; padding: 8px 14px; border-radius: 20px; font-size: 13px; white-space: nowrap; cursor: pointer; }
+    .filter-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+    .history-item { background: #1c1c1e; border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid #2c2c2e; display: flex; justify-content: space-between; align-items: flex-start; }
+    .category-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; background: #3b82f620; color: #60a5fa; }
+    .item-title { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+    .item-sub { font-size: 13px; color: #a1a1aa; }
+    .item-right { text-align: right; }
+    .item-km { font-size: 15px; font-weight: 600; color: #34d399; }
+    .item-price { font-size: 13px; color: #f43f5e; margin-top: 3px; }
+    .btn-del { background: transparent; border: none; color: #71717a; font-size: 16px; cursor: pointer; padding: 0 0 0 10px; }
+    
+    .car-info { background: #27272a; border-radius: 10px; padding: 10px; text-align: center; font-weight: 600; color: #60a5fa; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>🚘 Сервісна Книжка</h1>
+
+  <!-- Блок авто -->
+  <div class="card">
+    <label>Дані про автомобіль:</label>
+    <div class="row">
+      <div style="flex: 2;">
+        <input type="text" id="carModel" placeholder="Марка та модель (напр. Passat B7)">
+      </div>
+      <div style="flex: 1;">
+        <input type="number" id="carYear" placeholder="Рік">
+      </div>
+    </div>
+    <button style="background: #374151; padding: 8px; font-size: 13px;" class="btn-add" onclick="saveCar()">Зберегти авто</button>
+  </div>
+
+  <!-- Відображення імені авто -->
+  <div id="carHeader" class="car-info" style="display: none;"></div>
+
+  <!-- Запис робіт -->
+  <div class="card">
+    <label>Що міняв / робив:</label>
+    <select id="category">
+      <option value="🛢️ Моторне масло">🛢️ Моторне масло</option>
+      <option value="🛞 Гальмівні колодки/диски">🛞 Гальмівні колодки/диски</option>
+      <option value="💨 Фільтри (повітр./салон/паливн.)">💨 Фільтри (повітряний / салон / паливний)</option>
+      <option value="🔧 Ходова / Підвіска">🔧 Ходова / Підвіска</option>
+      <option value="⚡ Свічки запалювання">⚡ Свічки запалювання</option>
+      <option value="⚙️ Масло КПП / АКПП">⚙️ Масло КПП / АКПП</option>
+      <option value="🧪 Антифриз / Гальмівна рідина">🧪 Антифриз / Гальмівна рідина</option>
+      <option value="🛠️ Інший ремонт">🛠️ Інший ремонт / Деталі</option>
+    </select>
+
+    <div class="row">
+      <div>
+        <label>Пробіг (км):</label>
+        <input type="number" id="km" placeholder="185000">
+      </div>
+      <div>
+        <label>Дата:</label>
+        <input type="date" id="date">
+      </div>
+    </div>
+
+    <label>Фірма, деталь або нотатки:</label>
+    <input type="text" id="note" placeholder="напр. Brembo, 5W-30 Shell, важелі...">
+
+    <label>Ціна (грн):</label>
+    <input type="number" id="price" placeholder="2500">
+
+    <button class="btn-add" onclick="saveData()">Записати в журнал</button>
+  </div>
+
+  <div class="filter-bar" id="filters">
+    <button class="filter-btn active" onclick="filterCat('ALL', this)">Всі</button>
+    <button class="filter-btn" onclick="filterCat('🛢️ Моторне масло', this)">Масло</button>
+    <button class="filter-btn" onclick="filterCat('🛞 Гальмівні колодки/диски', this)">Колодки</button>
+    <button class="filter-btn" onclick="filterCat('💨 Фільтри (повітр./салон/паливн.)', this)">Фільтри</button>
+    <button class="filter-btn" onclick="filterCat('🔧 Ходова / Підвіска', this)">Ходова</button>
+  </div>
+
+  <h2>Історія обслуговування:</h2>
+  <div id="history"></div>
+
+  <script>
+    document.getElementById('date').valueAsDate = new Date();
+    let currentFilter = 'ALL';
+
+    function loadCar() {
+      const car = JSON.parse(localStorage.getItem('car_info') || '{}');
+      if (car.model) {
+        document.getElementById('carModel').value = car.model || '';
+        document.getElementById('carYear').value = car.year || '';
+        const header = document.getElementById('carHeader');
+        header.style.display = 'block';
+        header.innerText = `🚗 ${car.model} ${car.year ? '(' + car.year + ')' : ''}`;
+      }
+    }
+
+    function saveCar() {
+      const model = document.getElementById('carModel').value;
+      const year = document.getElementById('carYear').value;
+      localStorage.setItem('car_info', JSON.stringify({ model, year }));
+      loadCar();
+      alert('Дані авто збережено!');
+    }
+
+    function filterCat(cat, btn) {
+      currentFilter = cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = JSON.parse(localStorage.getItem('car_service_log') || '[]');
+      const container = document.getElementById('history');
+      
+      const filtered = currentFilter === 'ALL' 
+        ? history 
+        : history.filter(item => item.category === currentFilter);
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<p style="color: #71717a; text-align: center; margin-top: 20px;">Записів за цим фільтром немає</p>';
+        return;
+      }
+
+      container.innerHTML = filtered.map((item, index) => `
+        <div class="history-item">
+          <div>
+            <span class="category-badge">${item.category}</span>
+            <div class="item-title">${item.note || 'Заміна / Обслуговування'}</div>
+            <div class="item-sub">${item.date}</div>
+          </div>
+          <div class="item-right">
+            <div class="item-km">${item.km} км</div>
+            ${item.price ? `<div class="item-price">${item.price} грн</div>` : ''}
+          </div>
+          <button class="btn-del" onclick="deleteItem(${index})">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function saveData() {
+      const category = document.getElementById('category').value;
+      const km = document.getElementById('km').value;
+      const date = document.getElementById('date').value;
+      const note = document.getElementById('note').value;
+      const price = document.getElementById('price').value;
+
+      if (!km) { alert('Вкажи пробіг!'); return; }
+
+      const history = JSON.parse(localStorage.getItem('car_service_log') || '[]');
+      history.unshift({ category, km, date, note, price });
+      localStorage.setItem('car_service_log', JSON.stringify(history));
+
+      document.getElementById('km').value = '';
+      document.getElementById('note').value = '';
+      document.getElementById('price').value = '';
+      renderHistory();
+    }
+
+    function deleteItem(index) {
+      if (confirm('Видалити цей запис?')) {
+        const history = JSON.parse(localStorage.getItem('car_service_log') || '[]');
+        history.splice(index, 1);
+        localStorage.setItem('car_service_log', JSON.stringify(history));
+        renderHistory();
+      }
+    }
+
+    loadCar();
+    renderHistory();
+  </script>
+
+</body>
+</html>
